@@ -1,8 +1,12 @@
 from flask import Flask
+from _utils.db import init_db
+from flask_sqlalchemy import SQLAlchemy
 import _routes
 
 app = Flask(__name__)
 app.register_blueprint(_routes.users)
+
+init_db()
 
 @app.route("/")
 def root():
