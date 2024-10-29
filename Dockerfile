@@ -1,10 +1,11 @@
-FROM --platform=${BUILDPLATFORM} python:3.9-alpine AS arm
+FROM --platform=${BUILDPLATFORM} python:3.9-alpine AS build
 
 WORKDIR /code
 
 RUN apk add gcc musl-dev g++ python3-dev linux-headers libffi-dev
 
 COPY requirements.txt requirements.txt
+COPY wait-for wait-for
 
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -12,4 +13,4 @@ EXPOSE 5001
 
 COPY . .
 
-ENTRYPOINT [ "./wait-for", "mysql:3307", "--", "python", "index.py" ]
+ENTRYPOINT [ "./wait-for", "postgres:5432", "--", "python", "-u" "index.py" ]

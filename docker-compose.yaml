@@ -1,22 +1,21 @@
 services:
   web: # servizio che contiene l'app morra-flask
-    image: grimos10/iot_backend:arm
+    build: . # cartella contenente il Dockerfile
     env_file: # file contenente le variabili d'ambiente
       testing_vars.env
     ports:
       - 5001:5001
-    entrypoint: [ "./wait-for", "mysql:3307", "--", "python", "index.py" ]
-  mysql:
-    image: "mysql:5.7"
-    platform: linux/x86_64
-    restart: always
+    entrypoint: [ "./wait-for", "postgres:5432", "--", "python", "-u", "index.py" ]
+    depends_on:
+      - postgres
+  postgres: # servizio che contiene il database postgres
+    image: postgres:14-alpine
     ports:
-      - "3307:3307"
-    env_file:
-      testing_vars.env
-    volumes: # utilizzo di un volume per preservare i dati del DB
-      - dbvol:/var/lib/mysql
-
-volumes: # elenco dei volumi da creare (in questo caso uno solo)
-  dbvol:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=postgres
+    volumes:
+      - ~/apps/postgres:/var/lib/postgresql/data
   

@@ -7,7 +7,7 @@ import _routes
 app = Flask(__name__)
 app.register_blueprint(_routes.users)
 
-#init_db()
+init_db()
 
 @app.route("/")
 def root():

@@ -50,3 +50,20 @@ def init_db():
     import _utils.models
     Base.metadata.create_all(bind=engine)
 """
+
+# using POSTGRESQL
+
+engine = create_engine('postgresql://admin:pass@localhost:5432/postgres')
+
+session = scoped_session(sessionmaker(autocommit=False,
+                                            autoflush=False,
+                                            bind=engine))
+
+Base = declarative_base()
+Base.query = session.query_property()
+
+def init_db():
+    import _utils.models
+    Base.metadata.create_all(bind=engine)
+
+
