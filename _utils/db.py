@@ -39,7 +39,7 @@ User.query.filter(User.id == "Grimos10").delete().
 db.session.commit()
 In pratica è molto semplice. Il resto della roba
 in questo file serve per far funzionare tutto.
-"""
+
 engine = create_engine('sqlite:///test.db')
 session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
@@ -49,3 +49,4 @@ Base.query = session.query_property()
 def init_db():
     import _utils.models
     Base.metadata.create_all(bind=engine)
+"""

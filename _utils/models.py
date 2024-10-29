@@ -10,7 +10,7 @@ Per il momento ho scritto la classe User,
 poi aggiungere Match e poi eventualmente
 altre cose che ci serviranno per l'app.
 """
-class Slot(db.Base):
+class Slot(db.Model):
     """
     Modello di utente della nostra app.
     Vittorie, sconfitte e punteggio vengono
