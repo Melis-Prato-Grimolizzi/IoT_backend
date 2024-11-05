@@ -51,3 +51,10 @@ class Slot(db.Base):
         #self.password = hashpw(password, gensalt(consts.BCRYPT_SALT_ROUNDS))
     #def check_password(self, password):
     #    return checkpw(password, self.password)
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'zone': self.zone,
+            'state': self.state
+        }

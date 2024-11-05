@@ -3,6 +3,7 @@ services:
     build: . # cartella contenente il Dockerfile
     env_file: # file contenente le variabili d'ambiente
       testing_vars.env
+    network_mode: host
     ports:
       - 5001:5001
     entrypoint: [ "./wait-for", "postgres:5432", "--", "python", "-u", "index.py" ]

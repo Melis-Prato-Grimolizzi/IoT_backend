@@ -53,7 +53,7 @@ def init_db():
 
 # using POSTGRESQL
 
-engine = create_engine('postgresql+psycopg2://admin:pass@localhost:5432/postgres')
+engine = create_engine('postgresql+psycopg2://admin:pass@postgres:5432/postgres', echo=True)
 
 session = scoped_session(sessionmaker(autocommit=False,
                                             autoflush=False,
