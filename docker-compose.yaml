@@ -5,7 +5,7 @@ services:
       network: host
     network_mode: host
     env_file: # file contenente le variabili d'ambiente
-      testing_vars.env
+      .env
     restart: unless-stopped
     ports:
       - 5001:5001
