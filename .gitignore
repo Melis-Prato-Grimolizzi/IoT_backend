@@ -2,12 +2,14 @@ __pycache__/
 *.py[cod]
 *$py.class
 testing_vars.env
+.env
 wait-for
 # C extensions
 *.so
 # Distribution / packaging
 .Python
 .venv/
+test/
 test.db
 Pipfile
 build/

@@ -1,9 +1,12 @@
 services:
   web: # servizio che contiene l'app morra-flask
-    build: . # cartella contenente il Dockerfile
+    build: 
+      context: . # cartella contenente il Dockerfile
+      network: host
+    network_mode: host
     env_file: # file contenente le variabili d'ambiente
       testing_vars.env
-    network_mode: host
+    restart: unless-stopped
     ports:
       - 5001:5001
     entrypoint: [ "./wait-for", "postgres:5432", "--", "python", "-u", "index.py" ]
@@ -13,10 +16,11 @@ services:
     image: postgres:14-alpine
     ports:
       - 5432:5432
+    restart: unless-stopped
     environment:
-      - POSTGRES_PASSWORD=pass
-      - POSTGRES_USER=admin
-      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD = ${POSTGRES_PASSWORD:?err}
+      - POSTGRES_USER = ${POSTGRES_USER:?err}
+      - POSTGRES_DB = ${POSTGRES_DB:?err}
     volumes:
       - ~/apps/postgres:/var/lib/postgresql/data
   
