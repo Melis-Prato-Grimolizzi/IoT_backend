@@ -1,14 +1,18 @@
+networks:
+  iot-backend-net:
+    name: iot-backend-net
 services:
   web: # servizio che contiene l'app morra-flask
     build: 
       context: . # cartella contenente il Dockerfile
       network: host
-    network_mode: host
     env_file: # file contenente le variabili d'ambiente
       .env
+    networks:
+      - iot-backend-net
     restart: unless-stopped
     ports:
-      - 5001:5001
+      - 3000:3000
     entrypoint: [ "./wait-for", "postgres:5432", "--", "python", "-u", "index.py" ]
     depends_on:
       - postgres
@@ -16,6 +20,8 @@ services:
     image: postgres:14-alpine
     ports:
       - 5432:5432
+    networks: 
+      - iot-backend-net
     restart: unless-stopped
     environment:
       - POSTGRES_PASSWORD = ${POSTGRES_PASSWORD:?err}

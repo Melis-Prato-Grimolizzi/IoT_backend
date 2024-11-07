@@ -9,7 +9,7 @@ COPY wait-for wait-for
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 5001
+EXPOSE 3000
 
 COPY . .
 
