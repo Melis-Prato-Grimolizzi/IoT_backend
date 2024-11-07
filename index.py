@@ -28,6 +28,8 @@ if missing_vars:
 app = Flask(__name__)
 
 
+"""Inizializzazione del database"""
+
 db_database = getenv("POSTGRES_DB")
 db_user = getenv("POSTGRES_USER")
 db_password = getenv("POSTGRES_PASSWORD")
@@ -37,6 +39,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql+psycopg2://{db_user}:{db_pa
 db.init_app(app)
 with app.app_context():
   db.create_all()
+
+
 
 app.register_blueprint(_routes.users)
 
