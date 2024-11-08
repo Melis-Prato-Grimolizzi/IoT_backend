@@ -1,9 +1,16 @@
 from flask import Blueprint
-from _utils import users
+from _utils import user
 
-users = Blueprint('users', __name__, url_prefix="/users")
+user = Blueprint('users', __name__, url_prefix="/users")
 
 
 """
 Route usate per gestire gli utenti.
 """
+
+@user.route("/login", methods=["POST"])
+def login():
+    """
+    Route per il login.
+    """
+    return user.login()
