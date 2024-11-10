@@ -2,9 +2,10 @@ from os import getenv
 from dotenv import load_dotenv
 
 from flask import Flask, jsonify
+from _routes import users
 from _utils import db
 from _utils.models import Slot
-import _routes
+from _routes import *
 
 load_dotenv()
 
@@ -42,13 +43,13 @@ with app.app_context():
 
 
 
-app.register_blueprint(_routes.users)
+app.register_blueprint(users.users)
 
 
 @app.route("/")
 def root():
   #mettiamo nella tabella Slot un elemento
-  slot = Slot(1)
+  slot = Slot(1, "45.123", "9.123")
   db.session.add(slot)
   db.session.commit()
   result = Slot.query.all()
