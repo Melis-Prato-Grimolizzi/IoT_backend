@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, Response
 from _utils import models, decorators
 
 
@@ -25,7 +25,7 @@ def get_slot(slot_id):
     Route per ottenere un singolo slot.
     """
     Slot = models.Slot.query.get(slot_id)
-    return jsonify(Slot.serialize())
+    return jsonify(Slot.serialize()) if Slot is not None else Response("not found", 404)
 
 
 
@@ -53,6 +53,8 @@ def delete_slot(slot_id):
     Route per eliminare uno slot.
     """
     Slot = models.Slot.query.get(slot_id)
+    if Slot is None:
+        return Response("not found", 404)
     models.db.session.delete(Slot)
     models.db.session.commit()
     return "OK"
@@ -67,6 +69,8 @@ def update_slot(user_id, slot_id):
     """
     print("L'utente {} ha cambiato lo stato dello slot {}".format(user_id, slot_id))
     Slot = models.Slot.query.get(slot_id)
+    if Slot is None:
+        return Response("not found", 404)
     if Slot.state is False: #significa che l'utente si è parcheggiato quindi bisogna anche far partire il timer per il pagamento
         print("L'utente {} si è parcheggiato nello slot {}".format(user_id, slot_id))
         Slot.state = not Slot.state
@@ -85,4 +89,4 @@ def get_slot_state(slot_id):
     Route per ottenere lo stato di uno slot.
     """
     Slot = models.Slot.query.get(slot_id)
-    return jsonify(Slot.get_state())
+    return jsonify(Slot.get_state()) if Slot is not None else Response("not found", 404)
