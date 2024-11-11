@@ -31,3 +31,13 @@ def signup():
         return Response("OK", status=201)
     except user.DuplicateUserError:
         return Response("username conflict", status=409)
+
+@users.route("/login", methods=['POST'])
+@decorators.FormValidatorDecorator(
+    required_fields=["username", "password"],
+    validators=[models.User.validate_username, models.User.validate_password])
+def login():
+    try:
+        return user.login(request.form['username'], request.form['password'])
+    except user.BadCredentialsError:
+        return Response("bad credentials", status=401)

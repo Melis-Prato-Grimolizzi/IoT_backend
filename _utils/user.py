@@ -66,7 +66,7 @@ def signup(username: str, password: str):
 
 
 def login(username: str, password: str):
-    user = models.User.query.filter(models.User.username == username.encode("utf-8")).first()
+    user = models.User.query.filter(models.User.username == username).first()
     if user is None or not user.check_password(password):
         print("wrong password", flush=True)
         raise BadCredentialsError

@@ -46,7 +46,8 @@ class User(db.Model):
     
     def __init__(self, username, password):
         self.username = username
-        self.password = hashpw(password, gensalt(consts.BCRYPT_SALT_ROUNDS))
+        pwhash = hashpw(password, gensalt(consts.BCRYPT_SALT_ROUNDS))
+        self.password = pwhash.decode('utf-8')
 
     def serialize(self):
         return {
