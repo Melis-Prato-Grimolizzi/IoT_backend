@@ -4,7 +4,9 @@ import functools
 import jwt
 from flask import request, Response, abort
 
-from _utils import consts
+from _utils import consts, user
+from _utils.models import User
+from _utils.user import get
 
 key_from_env = getenv("JWT_KEY")
 jwt_key = consts.JWT_TEST_KEY if key_from_env is None else key_from_env
@@ -76,5 +78,32 @@ def auth_decorator(f):
         Decorator che verifica se il jwt è presente ed è valido.
         """
         return f(get_user_id(), *args, **kwargs)
+
+    return decorated
+
+def admin_decorator(f):
+    def get_user_id():
+        try:
+            token = request.headers.get("Authorization").split("Bearer ")[1]
+            payload = jwt.decode(token, jwt_key, algorithms=["HS256"])
+            return int(payload["id"])
+        except jwt.DecodeError:
+            abort(Response("bad token", status=401))
+        except IndexError:
+            abort(Response("bad Authorization string", status=400))
+        except AttributeError:
+            abort(Response("missing Authorization header", status=400))
+
+    @functools.wraps(f)
+    def decorated(*args, **kwargs):
+        """
+        Decorator che verifica se il jwt è presente ed è valido.
+        """
+        user_id = get_user_id()
+        user = get(user_id)
+        user.serialize()
+        if user.username != "bridge":
+            abort(Response("not an admin", status=403))
+        return f(user.username, *args, **kwargs)
 
     return decorated

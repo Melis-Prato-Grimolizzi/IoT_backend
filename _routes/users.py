@@ -16,6 +16,14 @@ def get_users():
     result = user.get_all()
     return jsonify([u.serialize() for u in result])
 
+@users.route("/user/<user_id>", methods=["GET"])
+def get_user(user_id):
+    """
+    Route per ottenere un singolo utente.
+    """
+    result = user.get(user_id)
+    return jsonify(result.serialize())
+
 @users.route("/verify", methods=['GET'])
 @decorators.auth_decorator
 def get_logged_in_status(user_id):
