@@ -34,6 +34,36 @@ class Slot(db.Model):
     def get_state(self):
         return self.state
     
+    @staticmethod
+    def validate_zone(zone: int):
+        if zone is None:
+            return False
+        
+        if not zone.isdigit():
+            return False
+        
+        return True
+    
+    @staticmethod
+    def validate_latitude(latitude: str):
+        if latitude is None:
+            return False
+        
+        if not latitude.replace('.', '', 1).isdigit():
+            return False
+        
+        return True
+    
+    @staticmethod
+    def validate_longitude(longitude: str):
+        if longitude is None:
+            return False
+        
+        if not longitude.replace('.', '', 1).isdigit():
+            return False
+        
+        return True
+    
 
 class User(db.Model):
     """

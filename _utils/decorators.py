@@ -104,6 +104,6 @@ def admin_decorator(f):
         user.serialize()
         if user.username != "bridge":
             abort(Response("not an admin", status=403))
-        return f(user.username, *args, **kwargs)
+        return f(*args, **kwargs)
 
     return decorated

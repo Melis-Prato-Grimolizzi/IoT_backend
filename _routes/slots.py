@@ -18,6 +18,7 @@ def get_slots():
     return jsonify([s.serialize() for s in Slot])
 
 
+
 @slots.route("/slot/<slot_id>", methods=["GET"])
 def get_slot(slot_id):
     """
@@ -26,15 +27,62 @@ def get_slot(slot_id):
     Slot = models.Slot.query.get(slot_id)
     return jsonify(Slot.serialize())
 
+
+
 @slots.route("/add_slot", methods=["POST"])
+@decorators.FormValidatorDecorator(
+    required_fields=["zone", "latitude", "longitude"],
+    validators=[models.Slot.validate_zone, models.Slot.validate_latitude, models.Slot.validate_longitude]
+)
 @decorators.admin_decorator
-def add_slot(username):
+def add_slot():
     """
     Route per aggiungere uno slot.
     """
-    if username != "bridge":
-        return "not an admin"
     Slot = models.Slot(request.form['zone'], request.form['latitude'], request.form['longitude'])
     models.db.session.add(Slot)
     models.db.session.commit()
     return "OK"
+
+
+
+@slots.route("/delete_slot/<slot_id>", methods=["POST"])
+@decorators.admin_decorator
+def delete_slot(slot_id):
+    """
+    Route per eliminare uno slot.
+    """
+    Slot = models.Slot.query.get(slot_id)
+    models.db.session.delete(Slot)
+    models.db.session.commit()
+    return "OK"
+
+
+
+@slots.route("/update_slot_state/<slot_id>", methods=["POST"])
+@decorators.auth_decorator
+def update_slot(user_id, slot_id):
+    """
+    Route per aggiornare lo stato dello slot.
+    """
+    print("L'utente {} ha cambiato lo stato dello slot {}".format(user_id, slot_id))
+    Slot = models.Slot.query.get(slot_id)
+    if Slot.state is False: #significa che l'utente si è parcheggiato quindi bisogna anche far partire il timer per il pagamento
+        print("L'utente {} si è parcheggiato nello slot {}".format(user_id, slot_id))
+        Slot.state = not Slot.state
+    elif Slot.state is True: #significa che l'utente sta lasciando lo slot quindi bisogna fermare il timer
+        print("L'utente {} sta lasciando lo slot {}".format(user_id, slot_id))
+        Slot.state = not Slot.state
+    models.db.session.commit()
+    
+    return "OK"
+
+
+
+@slots.route("/get_slot_state/<slot_id>", methods=["GET"])
+def get_slot_state(slot_id):
+    """
+    Route per ottenere lo stato di uno slot.
+    """
+    Slot = models.Slot.query.get(slot_id)
+    return jsonify(Slot.get_state())
