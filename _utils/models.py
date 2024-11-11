@@ -41,12 +41,12 @@ class User(db.Model):
     """
     __tablename__ = 'User'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String, unique=True)
-    password = Column(String)
+    username = Column(String(30), unique=True)
+    password = Column(String(60))
     
     def __init__(self, username, password):
         self.username = username
-        self.password = hashpw(password.encode('utf-8'), gensalt(consts.BCRYPT_SALT_ROUNDS)).decode('utf-8')
+        self.password = hashpw(password, gensalt(consts.BCRYPT_SALT_ROUNDS))
 
     def serialize(self):
         return {

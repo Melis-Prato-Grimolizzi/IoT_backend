@@ -2,7 +2,7 @@ from os import getenv
 from dotenv import load_dotenv
 
 from flask import Flask, jsonify
-from _routes import users
+from _routes import users, slots
 from _utils import db
 from _utils.models import Slot
 from _routes import *
@@ -44,16 +44,16 @@ with app.app_context():
 
 
 app.register_blueprint(users.users)
+app.register_blueprint(slots.slots)
+
+
+if getenv("JWT_KEY") is None:
+    print("Non è stata impostata una chiave per firmare i JWT, quindi verrà usata quella di test")
 
 
 @app.route("/")
 def root():
-  #mettiamo nella tabella Slot un elemento
-  slot = Slot(1, "45.123", "9.123")
-  db.session.add(slot)
-  db.session.commit()
-  result = Slot.query.all()
-  return jsonify([s.serialize() for s in result])
+  return "Non c'è niente qui da vedere"
 
 print("Avvio server")
 
