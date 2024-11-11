@@ -46,7 +46,7 @@ def add_slot():
 
 
 
-@slots.route("/delete_slot/<slot_id>", methods=["POST"])
+@slots.route("/delete_slot/<slot_id>", methods=["DELETE"])
 @decorators.admin_decorator
 def delete_slot(slot_id):
     """
