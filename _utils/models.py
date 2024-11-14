@@ -67,6 +67,16 @@ class Slot(db.Model):
         
         return True
     
+    @staticmethod
+    def validate_parking_id(parking_id: int):
+        if parking_id is None:
+            return False
+        
+        if not parking_id.isdigit():
+            return False
+        
+        return True
+    
 
 class User(db.Model):
     """

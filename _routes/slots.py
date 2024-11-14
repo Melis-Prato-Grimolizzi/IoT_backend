@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, Response
-from _utils import models, decorators
+from _utils import models, decorators, slot
 
 
 slots = Blueprint('slots', __name__, url_prefix="/slots")
@@ -31,18 +31,19 @@ def get_slot(slot_id):
 
 @slots.route("/add_slot", methods=["POST"])
 @decorators.FormValidatorDecorator(
-    required_fields=["zone", "latitude", "longitude"],
-    validators=[models.Slot.validate_zone, models.Slot.validate_latitude, models.Slot.validate_longitude]
+    required_fields=["zone", "latitude", "longitude", "parking_id"],
+    validators=[models.Slot.validate_zone, models.Slot.validate_latitude, models.Slot.validate_longitude, models.Slot.validate_parking_id]
 )
 @decorators.admin_decorator
 def add_slot():
     """
     Route per aggiungere uno slot.
     """
-    Slot = models.Slot(request.form['zone'], request.form['latitude'], request.form['longitude'])
-    models.db.session.add(Slot)
-    models.db.session.commit()
-    return "OK"
+    try:
+        slot.add_slot(request.form['zone'], request.form['parking_id'], request.form['latitude'], request.form['longitude'])
+        return Response("OK", status=201)
+    except slot.DuplicateSlotError:
+        return Response("slot conflict, the id is already in use", status=409)
 
 
 
