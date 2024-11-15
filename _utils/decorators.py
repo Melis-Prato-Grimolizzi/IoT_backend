@@ -101,6 +101,8 @@ def admin_decorator(f):
         """
         user_id = get_user_id()
         user = get(user_id)
+        if user is None:
+            abort(Response("user not found", status=404))
         user.serialize()
         if user.username != "bridge":
             abort(Response("not an admin", status=403))

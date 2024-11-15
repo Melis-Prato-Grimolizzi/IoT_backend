@@ -1,5 +1,5 @@
 from bcrypt import hashpw, gensalt, checkpw
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, DECIMAL
 from sqlalchemy.orm import relationship
 from _utils import db, consts
 import jwt
@@ -16,8 +16,8 @@ class Slot(db.Model):
     zone = Column(Integer, nullable=False)
     parking_id = Column(Integer, unique=True, nullable=False)
     state = Column(Boolean, default=False, nullable=False)
-    latitude = Column(String, nullable=False)
-    longitude = Column(String, nullable=False)
+    latitude = Column(DECIMAL(10,8), nullable=False)
+    longitude = Column(DECIMAL(11,8), nullable=False)
     def __init__(self, zone, parking_id, latitude, longitude):
         self.zone = zone
         self.parking_id = parking_id
@@ -84,8 +84,8 @@ class User(db.Model):
     """
     __tablename__ = 'User'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String(30), unique=True)
-    password = Column(String(60))
+    username = Column(String(30), unique=True, nullable=False)
+    password = Column(String(60), nullable=False)
     
     def __init__(self, username, password):
         self.username = username
