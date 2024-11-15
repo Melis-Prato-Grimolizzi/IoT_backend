@@ -17,16 +17,14 @@ services:
     depends_on:
       - postgres
   postgres: # servizio che contiene il database postgres
-    image: postgres:14-alpine
+    image: postgres:14
     ports:
       - 5432:5432
     networks: 
       - iot-backend-net
     restart: unless-stopped
-    environment:
-      - POSTGRES_PASSWORD = ${POSTGRES_PASSWORD:?err}
-      - POSTGRES_USER = ${POSTGRES_USER:?err}
-      - POSTGRES_DB = ${POSTGRES_DB:?err}
+    env_file:
+      .env
     volumes:
       - ~/apps/postgres:/var/lib/postgresql/data
   

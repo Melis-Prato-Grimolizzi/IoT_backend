@@ -13,11 +13,11 @@ class Slot(db.Model):
     """
     __tablename__ = 'Slot'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    zone = Column(Integer)
-    parking_id = Column(Integer, unique=True)
-    state = Column(Boolean, default=False)
-    latitude = Column(String)
-    longitude = Column(String)
+    zone = Column(Integer, nullable=False)
+    parking_id = Column(Integer, unique=True, nullable=False)
+    state = Column(Boolean, default=False, nullable=False)
+    latitude = Column(String, nullable=False)
+    longitude = Column(String, nullable=False)
     def __init__(self, zone, parking_id, latitude, longitude):
         self.zone = zone
         self.parking_id = parking_id
