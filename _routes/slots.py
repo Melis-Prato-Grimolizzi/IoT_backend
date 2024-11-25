@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Blueprint, jsonify, request, Response
 from _utils import models, decorators, slot
 
@@ -75,12 +76,26 @@ def update_slot(user_id, slot_id):
     if Slot.state is False: #significa che l'utente si è parcheggiato quindi bisogna anche far partire il timer per il pagamento
         print("L'utente {} si è parcheggiato nello slot {}".format(user_id, slot_id))
         Slot.state = not Slot.state
+        start_time = int(datetime.now().timestamp())
+        slot.start_parking_session(user_id, slot_id, start_time)
+        models.db.session.commit()
+        return "OK, Sessione di parcheggio iniziata"
     elif Slot.state is True: #significa che l'utente sta lasciando lo slot quindi bisogna fermare il timer
         print("L'utente {} sta lasciando lo slot {}".format(user_id, slot_id))
         Slot.state = not Slot.state
-    models.db.session.commit()
-    
-    return "OK"
+        end_time = int(datetime.now().timestamp())
+        try:
+            ParkingSession = slot.end_parking_session(user_id, slot_id, end_time)
+        except slot.NotFoundError:
+            return Response("not found", 404)
+        print("Il tempo trascorso è di {} secondi".format(end_time - ParkingSession.start_time)) #debug
+        if end_time - ParkingSession.start_time < 60:
+            print("Il tempo trascorso è minore di 60 secondi, non verrà effettuato alcun pagamento")
+            ParkingSession.amount = 0
+        else:
+            ParkingSession.amount = (end_time - ParkingSession.start_time) // 60 * 0.5
+        models.db.session.commit()
+        return "OK, Sessione di parcheggio terminata con sessione di {} secondi".format(end_time - ParkingSession.start_time)
 
 
 

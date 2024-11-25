@@ -1,8 +1,8 @@
 from bcrypt import hashpw, gensalt, checkpw
 from sqlalchemy import Column, Integer, String, Boolean, DECIMAL
-from sqlalchemy.orm import relationship
 from _utils import db, consts
 import jwt
+from sqlalchemy import ForeignKey
 """
 Qua vanno tutti i modelli di dato
 che useremo nell'app.
@@ -127,4 +127,32 @@ class User(db.Model):
                 return False
         return True
 
+
+class ParkingSession(db.Model):
+    """
+    Modello di ParkingSession della nostra app.
+    """
+    __tablename__ = 'ParkingSession'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey('User.id'), nullable=False)
+    slot_id = Column(Integer, ForeignKey('Slot.id'), nullable=False)
+    start_time = Column(Integer, nullable=True)
+    end_time = Column(Integer, nullable=True)
+    amount = Column(DECIMAL(10,2), nullable=True)
+    
+    def __init__(self, user_id, slot_id, start_time, end_time):
+        self.user_id = user_id
+        self.slot_id = slot_id
+        self.start_time = start_time
+        self.end_time = end_time
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'slot_id': self.slot_id,
+            'start_time': self.start_time,
+            'end_time': self.end_time,
+            'amount': self.amount
+        }
     
