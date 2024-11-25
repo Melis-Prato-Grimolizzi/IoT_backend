@@ -88,9 +88,8 @@ def update_slot(user_id, slot_id):
             ParkingSession = slot.end_parking_session(user_id, slot_id, end_time)
         except slot.NotFoundError:
             return Response("not found", 404)
-        print("Il tempo trascorso è di {} secondi".format(end_time - ParkingSession.start_time)) #debug
-        if end_time - ParkingSession.start_time < 60:
-            print("Il tempo trascorso è minore di 60 secondi, non verrà effettuato alcun pagamento")
+        if end_time - ParkingSession.start_time < 60:      #lasciamo 60 per ora ma quando deployeremo sarà 900 (15 minuti)
+            #Il tempo trascorso è minore di 60 secondi, non verrà effettuato alcun pagamento
             ParkingSession.amount = 0
         else:
             ParkingSession.amount = (end_time - ParkingSession.start_time) // 60 * 0.5
@@ -106,3 +105,35 @@ def get_slot_state(slot_id):
     """
     Slot = models.Slot.query.get(slot_id)
     return jsonify(Slot.get_state()) if Slot is not None else Response("not found", 404)
+
+
+#dobbiamo capire se serve avere il middleware per fare il controllo dell'admin per questa route
+@slots.route("/get_parking_sessions/", methods=["GET"])
+def get_parking_sessions():
+    """
+    Route per ottenere tutte le sessioni di parcheggio.
+    """
+    ParkingSession = models.ParkingSession.query.all()
+    return jsonify([p.serialize() for p in ParkingSession])
+
+
+
+@slots.route("/get_last_parking_session/", methods=["GET"])
+@decorators.auth_decorator
+def get_last_parking_session(user_id):
+    """
+    Route per ottenere l'ultima sessione di parcheggio dell'utente.
+    """
+    ParkingSession = models.ParkingSession.query.filter_by(user_id=user_id).order_by(models.ParkingSession.start_time.desc()).first()
+    return jsonify(ParkingSession.serialize()) if ParkingSession is not None else Response("not found", 404)
+
+
+
+@slots.route("/get_user_parking_sessions/", methods=["GET"])
+@decorators.auth_decorator
+def get_user_parking_sessions(user_id):
+    """
+    Route per ottenere tutte le sessioni di parcheggio dell'utente.
+    """
+    ParkingSession = models.ParkingSession.query.filter_by(user_id=user_id).all()
+    return jsonify([p.serialize() for p in ParkingSession]) if ParkingSession is not None else Response("not found", 404)

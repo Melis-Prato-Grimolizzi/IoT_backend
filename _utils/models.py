@@ -139,6 +139,8 @@ class ParkingSession(db.Model):
     start_time = Column(Integer, nullable=True)
     end_time = Column(Integer, nullable=True)
     amount = Column(DECIMAL(10,2), nullable=True)
+    #per completezza forse è meglio aggiungere anche un campo finished (booleano) per sapere se la sessione è finita
+    #probabilmente bisognerà aggiungere un campo per la targa dell'auto
     
     def __init__(self, user_id, slot_id, start_time, end_time):
         self.user_id = user_id
