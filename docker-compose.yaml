@@ -2,7 +2,7 @@ networks:
   iot-backend-net:
     name: iot-backend-net
 services:
-  web: # servizio che contiene l'app morra-flask
+  web: # servizio che contiene il backend
     build: 
       context: . # cartella contenente il Dockerfile
       network: host

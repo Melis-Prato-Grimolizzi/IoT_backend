@@ -1,10 +1,9 @@
 from os import getenv
 from dotenv import load_dotenv
 
-from flask import Flask, jsonify
+from flask import Flask
 from _routes import users, slots
 from _utils import db
-from _utils.models import Slot
 from _routes import *
 
 load_dotenv()

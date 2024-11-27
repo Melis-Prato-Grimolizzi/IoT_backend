@@ -1,7 +1,6 @@
 from bcrypt import hashpw, gensalt, checkpw
 from sqlalchemy import Column, Integer, String, Boolean, DECIMAL
 from _utils import db, consts
-import jwt
 from sqlalchemy import ForeignKey
 """
 Qua vanno tutti i modelli di dato

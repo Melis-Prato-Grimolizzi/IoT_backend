@@ -4,8 +4,7 @@ import functools
 import jwt
 from flask import request, Response, abort
 
-from _utils import consts, user
-from _utils.models import User
+from _utils import consts
 from _utils.user import get
 
 key_from_env = getenv("JWT_KEY")
