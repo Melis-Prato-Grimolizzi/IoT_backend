@@ -83,6 +83,7 @@ class User(db.Model):
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(30), unique=True, nullable=False)
     password = Column(String(60), nullable=False)
+    car_plate = Column(String(10), nullable=True, default=None, unique=True)
     
     def __init__(self, username, password):
         self.username = username
@@ -92,7 +93,8 @@ class User(db.Model):
     def serialize(self):
         return {
             'id': self.id,
-            'username': self.username
+            'username': self.username,
+            'car_plate': self.car_plate
         }
 
     def check_password(self, password):
