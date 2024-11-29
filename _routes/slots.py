@@ -7,7 +7,7 @@ slots = Blueprint('slots', __name__, url_prefix="/slots")
 
 
 """
-Route usate per gestire gli slots.
+Route usate per gestire gli slots e le sessioni di parcheggio.
 """
 
 @slots.route("/", methods=["GET"])
@@ -15,7 +15,7 @@ def get_slots():
     """
     Route per ottenere tutti gli slots.
     """
-    Slot = models.Slot.query.all()
+    Slot = slot.get_slots()
     return jsonify([s.serialize() for s in Slot])
 
 
@@ -25,7 +25,7 @@ def get_slot(slot_id):
     """
     Route per ottenere un singolo slot.
     """
-    Slot = models.Slot.query.get(slot_id)
+    Slot = slot.get_slot(slot_id)
     return jsonify(Slot.serialize()) if Slot is not None else Response("not found", 404)
 
 
@@ -54,12 +54,24 @@ def delete_slot(slot_id):
     """
     Route per eliminare uno slot.
     """
-    Slot = models.Slot.query.get(slot_id)
-    if Slot is None:
+    try:
+        slot.delete_slot(slot_id)
+        return Response("OK", status=200)
+    except slot.NotFoundError:
         return Response("not found", 404)
-    models.db.session.delete(Slot)
-    models.db.session.commit()
-    return "OK"
+
+
+
+@slots.route("/get_slots_by_zone/<zone>", methods=["GET"])
+def get_slots_by_zone(zone):
+    """
+    Route per ottenere tutti gli slots di una determinata zona.
+    """
+    try:
+        Slots = slot.get_slots_by_zone(zone)
+        return jsonify([s.serialize() for s in Slots])
+    except slot.NotFoundError:
+        return Response("not found", 404)
 
 
 
@@ -70,7 +82,7 @@ def update_slot(user_id, slot_id):
     Route per aggiornare lo stato dello slot.
     """
     print("L'utente {} ha cambiato lo stato dello slot {}".format(user_id, slot_id))
-    Slot = models.Slot.query.get(slot_id)
+    Slot = slot.get_slot(slot_id)
     if Slot is None:
         return Response("not found", 404)
     if Slot.state is False: #significa che l'utente si è parcheggiato quindi bisogna anche far partire il timer per il pagamento
@@ -103,8 +115,9 @@ def get_slot_state(slot_id):
     """
     Route per ottenere lo stato di uno slot.
     """
-    Slot = models.Slot.query.get(slot_id)
-    return jsonify(Slot.get_state()) if Slot is not None else Response("not found", 404)
+    Slot = slot.get_slot(slot_id)
+    return jsonify(Slot.state) if Slot is not None else Response("not found", 404)
+
 
 
 #dobbiamo capire se serve avere il middleware per fare il controllo dell'admin per questa route
@@ -113,7 +126,7 @@ def get_parking_sessions():
     """
     Route per ottenere tutte le sessioni di parcheggio.
     """
-    ParkingSession = models.ParkingSession.query.all()
+    ParkingSession = slot.get_parking_sessions()
     return jsonify([p.serialize() for p in ParkingSession])
 
 
@@ -124,7 +137,7 @@ def get_last_parking_session(user_id):
     """
     Route per ottenere l'ultima sessione di parcheggio dell'utente.
     """
-    ParkingSession = models.ParkingSession.query.filter_by(user_id=user_id).order_by(models.ParkingSession.start_time.desc()).first()
+    ParkingSession = slot.get_last_parking_session(user_id)
     return jsonify(ParkingSession.serialize()) if ParkingSession is not None else Response("not found", 404)
 
 
@@ -135,5 +148,5 @@ def get_user_parking_sessions(user_id):
     """
     Route per ottenere tutte le sessioni di parcheggio dell'utente.
     """
-    ParkingSession = models.ParkingSession.query.filter_by(user_id=user_id).all()
+    ParkingSession = slot.get_user_parking_sessions(user_id)
     return jsonify([p.serialize() for p in ParkingSession]) if ParkingSession is not None else Response("not found", 404)

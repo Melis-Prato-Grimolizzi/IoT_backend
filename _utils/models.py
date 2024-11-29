@@ -32,9 +32,7 @@ class Slot(db.Model):
             'latitude': self.latitude,
             'longitude': self.longitude
         }
-    
-    def get_state(self):
-        return self.state
+
     
     @staticmethod
     def validate_zone(zone: int):

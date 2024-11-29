@@ -1,12 +1,7 @@
-import os
-
-import jwt
-from sqlalchemy import text
-
-from _utils import models, db, consts
+from _utils import models, db
 
 """
-Cose di utilità per gestire gli slots
+Cose di utilità per gestire gli slots e le sessioni di parcheggio
 """
 
 class DuplicateSlotError(Exception):
@@ -15,14 +10,32 @@ class DuplicateSlotError(Exception):
 class NotFoundError(Exception):
     pass
 
-key_from_env = os.getenv("JWT_KEY")
-jwt_key = consts.JWT_TEST_KEY if key_from_env is None else key_from_env
+
+def get_slots():
+    return models.Slot.query.all()
+
+def get_slot(slot_id):
+    return models.Slot.query.get(slot_id)
+
+def get_slots_by_zone(zone):
+    Slots = models.Slot.query.filter_by(zone=zone).all()
+    if not Slots:
+        raise NotFoundError
+    return Slots
 
 def add_slot(zone, parking_id, latitude, longitude):
     if models.Slot.query.filter(models.Slot.parking_id == parking_id).all():
         raise DuplicateSlotError
     slot = models.Slot(zone, parking_id, latitude, longitude)
     db.session.add(slot)
+    db.session.commit()
+    return slot
+
+def delete_slot(slot_id):
+    slot = models.Slot.query.get(slot_id)
+    if slot is None:
+        raise NotFoundError
+    db.session.delete(slot)
     db.session.commit()
     return slot
 
@@ -38,3 +51,12 @@ def end_parking_session(user_id, slot_id, end_time):
     session.end_time = end_time
     db.session.commit()
     return session
+
+def get_parking_sessions():
+    return models.ParkingSession.query.all()
+
+def get_user_parking_sessions(user_id):
+    return models.ParkingSession.query.filter_by(user_id=user_id).all()
+
+def get_last_parking_session(user_id):
+    return models.ParkingSession.query.filter_by(user_id=user_id).order_by(models.ParkingSession.start_time.desc()).first()

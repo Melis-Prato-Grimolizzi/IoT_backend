@@ -1,7 +1,6 @@
 import os
 
 import jwt
-from sqlalchemy import text
 
 from _utils import models, db, consts
 
