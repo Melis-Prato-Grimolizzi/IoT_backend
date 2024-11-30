@@ -20,6 +20,10 @@ class BadCredentialsError(Exception):
     pass
 
 
+class DuplicateCarPlateError(Exception):
+    pass
+
+
 def get(userid):
     return models.User.query.get(userid)
 
@@ -28,10 +32,12 @@ def get_all():
     return models.User.query.all()
 
 
-def signup(username: str, password: str):
+def signup(username: str, password: str, car_plate: str):
     if models.User.query.filter(models.User.username == username).all():
         raise DuplicateUserError
-    user = models.User(username, password.encode("utf-8"))
+    if models.User.query.filter(models.User.car_plate == car_plate).all():
+        raise DuplicateCarPlateError
+    user = models.User(username, password.encode("utf-8"), car_plate)
     db.session.add(user)
     db.session.commit()
     return

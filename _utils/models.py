@@ -2,6 +2,7 @@ from bcrypt import hashpw, gensalt, checkpw
 from sqlalchemy import Column, Integer, String, Boolean, DECIMAL
 from _utils import db, consts
 from sqlalchemy import ForeignKey
+import re
 """
 Qua vanno tutti i modelli di dato
 che useremo nell'app.
@@ -85,10 +86,11 @@ class User(db.Model):
     password = Column(String(60), nullable=False)
     car_plate = Column(String(10), nullable=True, default=None, unique=True)
     
-    def __init__(self, username, password):
+    def __init__(self, username, password, car_plate):
         self.username = username
         pwhash = hashpw(password, gensalt(consts.BCRYPT_SALT_ROUNDS))
         self.password = pwhash.decode('utf-8')
+        self.car_plate = car_plate
 
     def serialize(self):
         return {
@@ -124,6 +126,18 @@ class User(db.Model):
         for char in username:
             if not char.isalnum():
                 return False
+        return True
+    
+    @staticmethod
+    def validate_car_plate(car_plate: str):
+        if car_plate is None:
+            return False
+        
+        # Italian car plates have the format AA123AA
+        pattern = r'^[A-Z]{2}\d{3}[A-Z]{2}$'
+        if not re.match(pattern, car_plate):
+            return False
+        
         return True
 
 

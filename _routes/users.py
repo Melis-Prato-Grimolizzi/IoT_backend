@@ -37,14 +37,16 @@ def get_logged_in_status(user_id):
 
 @users.route("/signup", methods=['POST'])
 @decorators.FormValidatorDecorator(
-    required_fields=["username", "password"],
-    validators=[models.User.validate_username, models.User.validate_password])
+    required_fields=["username", "password", "car_plate"],
+    validators=[models.User.validate_username, models.User.validate_password, models.User.validate_car_plate])
 def signup():
     try:
-        user.signup(request.form['username'], request.form['password'])
+        user.signup(request.form['username'], request.form['password'], request.form['car_plate'])
         return Response("OK", status=201)
     except user.DuplicateUserError:
         return Response("username conflict", status=409)
+    except user.DuplicateCarPlateError:
+        return Response("car plate conflict", status=409)
 
 
 
