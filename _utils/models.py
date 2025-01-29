@@ -97,7 +97,8 @@ class User(db.Model):
         return {
             'id': self.id,
             'username': self.username,
-            'car_plate': self.car_plate
+            'car_plate': self.car_plate,
+            'admin': self.admin
         }
 
     def check_password(self, password):
