@@ -75,39 +75,57 @@ def get_slots_by_zone(zone):
 
 
 
-@slots.route("/update_slot_state/<slot_id>", methods=["POST"])
+@slots.route("/start_parking_session/<slot_id>", methods=["POST"])
 @decorators.auth_decorator
-def update_slot(user_id, slot_id):
+def start_parking_session(user_id, slot_id):
+    """
+    Route per iniziare una sessione di parcheggio.
+    """
+    Slot = slot.get_slot(slot_id)
+    if Slot is None:
+        return Response("not found", 404)
+    if Slot.state is False:
+        return "Non puoi iniziare una sessione di parcheggio prima di esserti parcheggiato"
+    start_time = int(datetime.now().timestamp())
+    slot.start_parking_session(user_id, slot_id, start_time)
+    models.db.session.commit()
+    return "OK, Sessione di parcheggio iniziata per l'utente con id {} nello slot {}".format(user_id, slot_id)
+
+
+
+@slots.route("/update_slot_state/<slot_id>", methods=["POST"])
+@decorators.admin_decorator
+def update_slot(slot_id):
     """
     Route per aggiornare lo stato dello slot.
     """
-    print("L'utente {} ha cambiato lo stato dello slot {}".format(user_id, slot_id))
+    #print("L'utente {} ha cambiato lo stato dello slot {}".format(user_id, slot_id))
     Slot = slot.get_slot(slot_id)
     if Slot is None:
         return Response("not found", 404)
     if Slot.state is False: #significa che l'utente si è parcheggiato quindi bisogna anche far partire il timer per il pagamento
-        print("L'utente {} si è parcheggiato nello slot {}".format(user_id, slot_id))
+        #print("L'utente {} si è parcheggiato nello slot {}".format(user_id, slot_id))
         Slot.state = not Slot.state
-        start_time = int(datetime.now().timestamp())
-        slot.start_parking_session(user_id, slot_id, start_time)
-        models.db.session.commit()
-        return "OK, Sessione di parcheggio iniziata"
+        return "OK, Nello slot {} qualcuno si è parcheggiato".format(slot_id)
     elif Slot.state is True: #significa che l'utente sta lasciando lo slot quindi bisogna fermare il timer
-        print("L'utente {} sta lasciando lo slot {}".format(user_id, slot_id))
-        Slot.state = not Slot.state
-        end_time = int(datetime.now().timestamp())
-        try:
-            ParkingSession = slot.end_parking_session(user_id, slot_id, end_time)
-        except slot.NotFoundError:
-            return Response("not found", 404)
-        if end_time - ParkingSession.start_time < 60:      #lasciamo 60 per ora ma quando deployeremo sarà 900 (15 minuti)
-            #Il tempo trascorso è minore di 60 secondi, non verrà effettuato alcun pagamento
-            ParkingSession.amount = 0
+        #print("L'utente {} sta lasciando lo slot {}".format(user_id, slot_id))
+        ParkingSession = slot.get_last_parking_session_not_finished(slot_id)
+        if ParkingSession is None:
+            Slot.state = not Slot.state
+            return "OK, Nello slot {} qualcuno sta lasciando lo slot ma non c'è nessuna sessione di parcheggio".format(slot_id)
         else:
-            ParkingSession.amount = (end_time - ParkingSession.start_time) // 60 * 0.5
-        models.db.session.commit()
-        return "OK, Sessione di parcheggio terminata con sessione di {} secondi".format(end_time - ParkingSession.start_time)
-
+            Slot.state = not Slot.state
+            end_time = int(datetime.now().timestamp())
+            ParkingSession.end_time = end_time
+            ParkingSession.finished = True
+            if end_time - ParkingSession.start_time < 60:      #lasciamo 60 per ora ma quando deployeremo sarà 900 (15 minuti)
+                #Il tempo trascorso è minore di 60 secondi, non verrà effettuato alcun pagamento
+                ParkingSession.amount = 0
+            else:
+                ParkingSession.amount = (end_time - ParkingSession.start_time) // 60 * 0.5
+            models.db.session.commit()
+            return "OK, Nello slot {} l'utente con id {} ha lasciato il parcheggio ed ha finito la sessione di parcheggio con {} secondi".format(slot_id, ParkingSession.user_id, end_time - ParkingSession.start_time)
+        
 
 
 @slots.route("/get_slot_state/<slot_id>", methods=["GET"])

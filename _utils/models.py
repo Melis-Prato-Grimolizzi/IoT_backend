@@ -85,6 +85,7 @@ class User(db.Model):
     username = Column(String(30), unique=True, nullable=False)
     password = Column(String(60), nullable=False)
     car_plate = Column(String(10), nullable=True, default=None, unique=True)
+    admin = Column(Boolean, default=False, nullable=True)
     
     def __init__(self, username, password, car_plate):
         self.username = username
@@ -152,6 +153,7 @@ class ParkingSession(db.Model):
     start_time = Column(Integer, nullable=True)
     end_time = Column(Integer, nullable=True)
     amount = Column(DECIMAL(10,2), nullable=True)
+    finished = Column(Boolean, default=False, nullable=True)
     #per completezza forse è meglio aggiungere anche un campo finished (booleano) per sapere se la sessione è finita
     #probabilmente bisognerà aggiungere un campo per la targa dell'auto
     
