@@ -98,7 +98,6 @@ class User(db.Model):
             'id': self.id,
             'username': self.username,
             'car_plate': self.car_plate,
-            'admin': self.admin
         }
 
     def check_password(self, password):
