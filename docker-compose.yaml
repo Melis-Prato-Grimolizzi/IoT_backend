@@ -23,10 +23,8 @@ services:
     networks: 
       - iot-backend-net
     restart: unless-stopped
-    environment:
-      POSTGRES_PASSWORD: pass
-      POSTGRES_USER: admin
-      POSTGRES_DB: postgres
+    env_file:
+      .env
     volumes:
-      - C:\Users\fedem\OneDrive\Desktop\testdb:/var/lib/postgresql/data
+      - ~/apps/postgres:/var/lib/postgresql/data
   
