@@ -137,6 +137,16 @@ def get_slot_state(slot_id):
     return jsonify(Slot.state) if Slot is not None else Response("not found", 404)
 
 
+@slots.route("/get_all_slot_states/", methods=["GET"])
+@decorators.admin_decorator
+def get_all_slot_states():
+    """
+    Route per ottenere lo stato di tutti gli slots.
+    """
+    Slot = slot.get_slots()
+    return jsonify({s.id: s.state for s in Slot})
+
+
 
 #dobbiamo capire se serve avere il middleware per fare il controllo dell'admin per questa route
 @slots.route("/get_parking_sessions/", methods=["GET"])
