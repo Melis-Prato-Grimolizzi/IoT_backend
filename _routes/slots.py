@@ -141,11 +141,28 @@ def get_slot_state(slot_id):
 @decorators.admin_decorator
 def get_all_slot_states():
     """
-    Route per ottenere lo stato di tutti gli slots.
+    Author: Federico Melis
+    Route per ottenere lo stato di tutti gli slot.
     """
     Slot = slot.get_slots()
     return jsonify({s.id: s.state for s in Slot})
 
+
+# # TODO: Creare la tabella history [ds, id_slot, state]
+# @slots.route("/save_history/", methods=["POST"])
+# @decorators.admin_decorator
+# def save_history():
+#     """
+#     Author: Federico Melis
+#     Route per salvare la history.
+#     """
+#     # Prendo la lista dei nuovi stati dal body della richiesta, che sono salvati come json.
+#     new_states = request.json
+#     # Per ogni slot, salvo lo stato corrispondente.
+#     for slot_id, state in new_states.items():
+#         History.save_state(slot_id, state)
+#     models.db.session.commit()
+#     return "OK, History salvata"
 
 
 #dobbiamo capire se serve avere il middleware per fare il controllo dell'admin per questa route
