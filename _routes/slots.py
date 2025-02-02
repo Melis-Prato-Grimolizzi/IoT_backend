@@ -85,7 +85,7 @@ def start_parking_session(user_id, slot_id):
     if Slot is None:
         return Response("not found", 404)
     if Slot.state is False:
-        return "Non puoi iniziare una sessione di parcheggio prima di esserti parcheggiato"
+        return Response("Non puoi iniziare una sessione di parcheggio prima di esserti parcheggiato", 401)
     start_time = int(datetime.now().timestamp())
     slot.start_parking_session(user_id, slot_id, start_time)
     models.db.session.commit()
@@ -125,7 +125,19 @@ def update_slot(slot_id):
                 ParkingSession.amount = (end_time - ParkingSession.start_time) // 60 * 0.5
             models.db.session.commit()
             return "OK, Nello slot {} l'utente con id {} ha lasciato il parcheggio ed ha finito la sessione di parcheggio con {} secondi".format(slot_id, ParkingSession.user_id, end_time - ParkingSession.start_time)
-        
+
+
+
+@slots.route("/get_all_slot_states/", methods=["GET"])
+@decorators.admin_decorator
+def get_all_slot_states():
+    """
+    Author: Federico Melis
+    Route per ottenere lo stato di tutti gli slot.
+    """
+    Slot = slot.get_slots()
+    return jsonify({s.id: s.state for s in Slot})
+
 
 
 @slots.route("/get_slot_state/<slot_id>", methods=["GET"])
