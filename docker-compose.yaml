@@ -5,7 +5,6 @@ services:
   web: # servizio che contiene il backend
     build: 
       context: . # cartella contenente il Dockerfile
-      network: host
     env_file: # file contenente le variabili d'ambiente
       .env
     networks:

@@ -8,8 +8,10 @@ COPY requirements.txt requirements.txt
 COPY wait-for wait-for
 
 RUN pip install --no-cache-dir -r requirements.txt
+RUN chmod +x wait-for
 
 EXPOSE 3000
+ENV FLASK_RUN_HOST=0.0.0.0
 
 COPY . .
 

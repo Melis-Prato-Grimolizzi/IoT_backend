@@ -4,7 +4,7 @@ Revision ID: 4ba17b75bcc1
 Revises: c57964072fc0
 Create Date: 2025-01-29 15:56:01.423958
 
-"""
+
 from alembic import op
 import sqlalchemy as sa
 
@@ -36,3 +36,4 @@ def downgrade():
         batch_op.drop_column('finished')
 
     # ### end Alembic commands ###
+"""

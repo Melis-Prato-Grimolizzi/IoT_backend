@@ -1,5 +1,7 @@
 from os import getenv
 from dotenv import load_dotenv
+import eventlet
+from eventlet import wsgi
 
 from flask import Flask
 from flask_migrate import Migrate, upgrade
@@ -53,6 +55,4 @@ def root():
 print("Avvio server")
 
 if __name__ == "__main__":
-    with app.app_context():
-        upgrade()
-    app.run(host="0.0.0.0", port=3000)
+  wsgi.server(eventlet.listen(('', 3000)), app)
