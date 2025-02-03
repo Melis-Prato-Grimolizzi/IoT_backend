@@ -63,3 +63,24 @@ def get_user_parking_sessions(user_id):
 
 def get_last_parking_session(user_id):
     return models.ParkingSession.query.filter_by(user_id=user_id).order_by(models.ParkingSession.start_time.desc()).first()
+
+def update_parking_history(parking_id, state, timestamp):
+    history = models.ParkingStatusHistory(parking_id, state, timestamp)
+    db.session.add(history)
+    db.session.commit()
+
+def remove_oldest_parking_history():
+    """
+    Rimuovo la history di tutti i parcheggi più vecchia
+    """
+    history = models.ParkingStatusHistory.query.order_by(models.ParkingStatusHistory.timestamp.asc()).first()
+    models.ParkingStatusHistory.query.filter_by(timestamp=history.timestamp).delete()
+    db.session.commit()
+
+def get_history_size(slot_id):
+    return models.ParkingStatusHistory.query.filter_by(slot_id=slot_id).all().count()
+
+
+def get_slots_state():
+    Slots = models.Slot.query.all()
+    return {s.id: s.state for s in Slots}
