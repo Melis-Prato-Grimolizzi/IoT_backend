@@ -106,12 +106,14 @@ def update_slot(slot_id):
     if Slot.state is False: #significa che l'utente si è parcheggiato quindi bisogna anche far partire il timer per il pagamento
         #print("L'utente {} si è parcheggiato nello slot {}".format(user_id, slot_id))
         Slot.state = not Slot.state
+        models.db.session.commit()
         return "OK, Nello slot {} qualcuno si è parcheggiato".format(slot_id)
     elif Slot.state is True: #significa che l'utente sta lasciando lo slot quindi bisogna fermare il timer
         #print("L'utente {} sta lasciando lo slot {}".format(user_id, slot_id))
         ParkingSession = slot.get_last_parking_session_not_finished(slot_id)
         if ParkingSession is None:
             Slot.state = not Slot.state
+            models.db.session.commit()
             return "OK, Nello slot {} qualcuno sta lasciando lo slot ma non c'è nessuna sessione di parcheggio".format(slot_id)
         else:
             Slot.state = not Slot.state
