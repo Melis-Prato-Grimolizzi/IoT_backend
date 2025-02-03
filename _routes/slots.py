@@ -214,9 +214,8 @@ def update_parking_history_slot(parking_id):
     Si prende lo stato e il ts dal body della richiesta ma in formato json.
     """
     data = request.get_json()
+    print(data)
     if data is None:
-        return Response("bad request", 400)
-    if 'state' not in data or 'ts' not in data:
         return Response("bad request", 400)
     
     for ts, state in data.items():
