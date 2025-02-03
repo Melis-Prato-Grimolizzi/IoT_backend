@@ -72,8 +72,8 @@ def get_user_parking_sessions(user_id):
 def get_last_parking_session(user_id):
     return models.ParkingSession.query.filter_by(user_id=user_id).order_by(models.ParkingSession.start_time.desc()).first()
 
-def update_parking_history(slot_id, state, timestamp):
-    history = models.ParkingStatusHistory(slot_id, state, timestamp)
+def update_parking_history(parking_id, state, timestamp):
+    history = models.ParkingStatusHistory(parking_id, state, timestamp)
     db.session.add(history)
     db.session.commit()
 

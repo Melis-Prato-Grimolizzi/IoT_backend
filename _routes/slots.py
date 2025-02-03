@@ -206,15 +206,22 @@ def update_parking_history():
         return "OK, Cronologia del parcheggio aggiornata"
 
 
-@slots.route("/update_parking_history/<slot_id>/", methods=["POST"])
+@slots.route("/update_parking_history/<parking_id>/", methods=["POST"])
 @decorators.admin_decorator
-def update_parking_history_slot(slot_id):
+def update_parking_history_slot(parking_id):
     """
     Route per aggiornare la cronologia del parcheggio di uno slot.
-    Si prende lo stato dal body della richiesta.
+    Si prende lo stato e il ts dal body della richiesta ma in formato json.
     """
-    state = request.form['state']
-    timestamp = request.form['timestamp']
-    slot.update_parking_history(slot_id, state, timestamp)
-    return "OK, Cronologia del parcheggio aggiornata per lo slot {}".format(slot_id)
+    data = request.get_json()
+    if data is None:
+        return Response("bad request", 400)
+    if 'state' not in data or 'ts' not in data:
+        return Response("bad request", 400)
+    
+    for ts, state in data.items():
+        slot.update_parking_history(parking_id, state, ts)
+
+    return "OK, Cronologia del parcheggio aggiornata per lo slot {}".format(parking_id)
+    
     
