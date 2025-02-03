@@ -182,3 +182,39 @@ def get_user_parking_sessions(user_id):
     """
     ParkingSession = slot.get_user_parking_sessions(user_id)
     return jsonify([p.serialize() for p in ParkingSession]) if ParkingSession is not None else Response("not found", 404)
+
+
+
+@slots.route("/update_parking_history/", methods=["POST"])
+@decorators.admin_decorator
+def update_parking_history():
+    """
+    Route per aggiornare la cronologia del parcheggio.
+    """
+    SlotsState = slot.get_slots_state()
+    size = slot.get_history_size(1)
+    if size < 3600:
+        timestamp = int(datetime.now().timestamp())
+        for slot_id, state in SlotsState.items():
+            slot.update_parking_history(slot_id, state, timestamp)
+        return "OK, Cronologia del parcheggio aggiornata"
+    elif size >= 3600:
+        slot.remove_oldest_parking_history()
+        timestamp = int(datetime.now().timestamp())
+        for slot_id, state in SlotsState.items():
+            slot.update_parking_history(slot_id, state, timestamp)
+        return "OK, Cronologia del parcheggio aggiornata"
+
+
+@slots.route("/update_parking_history/<slot_id>/", methods=["POST"])
+@decorators.admin_decorator
+def update_parking_history_slot(slot_id):
+    """
+    Route per aggiornare la cronologia del parcheggio di uno slot.
+    Si prende lo stato dal body della richiesta.
+    """
+    state = request.form['state']
+    timestamp = request.form['timestamp']
+    slot.update_parking_history(slot_id, state, timestamp)
+    return "OK, Cronologia del parcheggio aggiornata per lo slot {}".format(slot_id)
+    

@@ -1,3 +1,4 @@
+from flask import jsonify
 from _utils import models, db
 
 """
@@ -14,8 +15,15 @@ class NotFoundError(Exception):
 def get_slots():
     return models.Slot.query.all()
 
+def get_slots_state():
+    Slots = models.Slot.query.all()
+    return {s.id: s.state for s in Slots}
+
 def get_slot(slot_id):
     return models.Slot.query.get(slot_id)
+
+def get_history_size(slot_id):
+    return models.ParkingStatusHistory.query.filter_by(slot_id=slot_id).all().count()
 
 def get_slots_by_zone(zone):
     Slots = models.Slot.query.filter_by(zone=zone).all()
@@ -63,3 +71,16 @@ def get_user_parking_sessions(user_id):
 
 def get_last_parking_session(user_id):
     return models.ParkingSession.query.filter_by(user_id=user_id).order_by(models.ParkingSession.start_time.desc()).first()
+
+def update_parking_history(slot_id, state, timestamp):
+    history = models.ParkingStatusHistory(slot_id, state, timestamp)
+    db.session.add(history)
+    db.session.commit()
+
+def remove_oldest_parking_history():
+    """
+    Rimuovo la history di tutti i parcheggi più vecchia
+    """
+    history = models.ParkingStatusHistory.query.order_by(models.ParkingStatusHistory.timestamp.asc()).first()
+    models.ParkingStatusHistory.query.filter_by(timestamp=history.timestamp).delete()
+    db.session.commit()

@@ -170,6 +170,50 @@ class ParkingSession(db.Model):
             'slot_id': self.slot_id,
             'start_time': self.start_time,
             'end_time': self.end_time,
-            'amount': self.amount
+            'amount': self.amount,
+            'finished': self.finished
+        }
+
+
+class ParkingStatusHistory(db.Model):
+    """
+    Modello di ParkingStatusHistory della nostra app.
+    """
+    __tablename__ = 'ParkingStatusHistory'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    parking_id = Column(Integer, ForeignKey('Slot.parking_id'), nullable=False)
+    state = Column(Boolean, default=False, nullable=False)
+    timestamp = Column(Integer, nullable=False)
+    
+    def __init__(self, parking_id, state, timestamp):
+        self.parking_id = parking_id
+        self.state = state
+        self.timestamp = timestamp
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'parking_id': self.parking_id,
+            'state': self.state,
+            'timestamp': self.timestamp
         }
     
+    @staticmethod
+    def validate_state(state: bool):
+        if state is None:
+            return False
+        
+        if not isinstance(state, bool):
+            return False
+        
+        return True
+    
+    @staticmethod
+    def validate_timestamp(timestamp: int):
+        if timestamp is None:
+            return False
+        
+        if not timestamp.isdigit():
+            return False
+        
+        return True
