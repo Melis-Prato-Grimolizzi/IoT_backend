@@ -75,6 +75,16 @@ class Slot(db.Model):
         
         return True
     
+    @staticmethod
+    def validate_state(state: bool):
+        if state is None:
+            return False
+        
+        if not isinstance(state, bool):
+            return False
+        
+        return True
+    
 
 class User(db.Model):
     """

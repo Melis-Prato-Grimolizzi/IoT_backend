@@ -138,7 +138,7 @@ def get_all_slot_states():
     Route per ottenere lo stato di tutti gli slot.
     """
     Slot = slot.get_slots()
-    return jsonify({s.id: s.state for s in Slot})
+    return jsonify({s.parking_id: s.state for s in Slot})
 
 
 
@@ -184,6 +184,25 @@ def get_user_parking_sessions(user_id):
     return jsonify([p.serialize() for p in ParkingSession]) if ParkingSession is not None else Response("not found", 404)
 
 
+@slots.route("/update_only_state/", methods=["POST"])
+@decorators.admin_decorator
+def update_only_state():
+    """
+    Route per aggiornare solo lo stato dello slot.
+    """
+    parking_id = request.form['parking_id']
+    Slot = slot.get_slot(parking_id)
+    if Slot is None:
+        return Response("not found", 404)
+    State = request.form['state']
+    if State == 1:
+        Slot.state = True
+    elif State == 0:
+        Slot.state = False
+    models.db.session.commit()
+    return "OK, Lo stato dello slot {} è stato aggiornato".format(parking_id)
+
+
 
 @slots.route("/update_parking_history/", methods=["POST"])
 @decorators.admin_decorator
@@ -192,17 +211,21 @@ def update_parking_history():
     Route per aggiornare la cronologia del parcheggio.
     """
     SlotsState = slot.get_slots_state()
+    print("DEBUG: lunghezza SlotsState")
+    print(len(SlotsState))
+    print(len(SlotsState.items()))
     size = slot.get_history_size(1)
     if size < 3600:
         timestamp = int(datetime.now().timestamp())
-        for slot_id, state in SlotsState.items():
-            slot.update_parking_history(slot_id, state, timestamp)
+        for parking_id, state in SlotsState.items():
+            slot.update_parking_history(parking_id, state, timestamp)
         return "OK, Cronologia del parcheggio aggiornata"
     elif size >= 3600:
         slot.remove_oldest_parking_history()
+        print("Rimossa la history più vecchia")
         timestamp = int(datetime.now().timestamp())
-        for slot_id, state in SlotsState.items():
-            slot.update_parking_history(slot_id, state, timestamp)
+        for parking_id, state in SlotsState.items():
+            slot.update_parking_history(parking_id, state, timestamp)
         return "OK, Cronologia del parcheggio aggiornata"
 
 
@@ -214,7 +237,6 @@ def update_parking_history_slot(parking_id):
     Si prende lo stato e il ts dal body della richiesta ma in formato json.
     """
     data = request.get_json()
-    print(data)
     if data is None:
         return Response("bad request", 400)
     
