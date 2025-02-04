@@ -213,7 +213,7 @@ def update_parking_history():
     SlotsState = slot.get_slots_state()
     print("DEBUG: lunghezza SlotsState")
     print(len(SlotsState))
-    size = slot.get_history_size(1)
+    size = slot.get_history_size(4)
     if size < 3600:
         timestamp = int(datetime.now().timestamp())
         for parking_id, state in SlotsState.items():
