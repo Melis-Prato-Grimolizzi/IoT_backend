@@ -19,8 +19,8 @@ def get_slots_state():
     Slots = models.Slot.query.all()
     return {s.parking_id: s.state for s in Slots}
 
-def get_slot(slot_id):
-    return models.Slot.query.get(slot_id)
+def get_slot(parking_id):
+    return models.Slot.query.get(parking_id=parking_id)
 
 def get_history_size(parking_id):
     return models.ParkingStatusHistory.query.filter_by(parking_id=parking_id).count()

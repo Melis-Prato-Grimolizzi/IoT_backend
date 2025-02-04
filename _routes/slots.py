@@ -20,12 +20,12 @@ def get_slots():
 
 
 
-@slots.route("/slot/<slot_id>", methods=["GET"])
-def get_slot(slot_id):
+@slots.route("/slot/<parking_id>", methods=["GET"])
+def get_slot(parking_id):
     """
     Route per ottenere un singolo slot.
     """
-    Slot = slot.get_slot(slot_id)
+    Slot = slot.get_slot(parking_id)
     return jsonify(Slot.serialize()) if Slot is not None else Response("not found", 404)
 
 
@@ -48,14 +48,14 @@ def add_slot():
 
 
 
-@slots.route("/delete_slot/<slot_id>", methods=["DELETE"])
+@slots.route("/delete_slot/<parking_id>", methods=["DELETE"])
 @decorators.admin_decorator
-def delete_slot(slot_id):
+def delete_slot(parking_id):
     """
     Route per eliminare uno slot.
     """
     try:
-        slot.delete_slot(slot_id)
+        slot.delete_slot(parking_id)
         return Response("OK", status=200)
     except slot.NotFoundError:
         return Response("not found", 404)
@@ -75,46 +75,46 @@ def get_slots_by_zone(zone):
 
 
 
-@slots.route("/start_parking_session/<slot_id>", methods=["POST"])
+@slots.route("/start_parking_session/<parking_id>", methods=["POST"])
 @decorators.auth_decorator
-def start_parking_session(user_id, slot_id):
+def start_parking_session(user_id, parking_id):
     """
     Route per iniziare una sessione di parcheggio.
     """
-    Slot = slot.get_slot(slot_id)
+    Slot = slot.get_slot(parking_id)
     if Slot is None:
         return Response("not found", 404)
     if Slot.state is False:
         return Response("Non puoi iniziare una sessione di parcheggio prima di esserti parcheggiato", 401)
     start_time = int(datetime.now().timestamp())
-    slot.start_parking_session(user_id, slot_id, start_time)
+    slot.start_parking_session(user_id, parking_id, start_time)
     models.db.session.commit()
-    return "OK, Sessione di parcheggio iniziata per l'utente con id {} nello slot {}".format(user_id, slot_id)
+    return "OK, Sessione di parcheggio iniziata per l'utente con id {} nello slot {}".format(user_id, parking_id)
 
 
 
-@slots.route("/update_slot_state/<slot_id>", methods=["POST"])
+@slots.route("/update_slot_state/<parking_id>", methods=["POST"])
 @decorators.admin_decorator
-def update_slot(slot_id):
+def update_slot(parking_id):
     """
     Route per aggiornare lo stato dello slot.
     """
-    #print("L'utente {} ha cambiato lo stato dello slot {}".format(user_id, slot_id))
-    Slot = slot.get_slot(slot_id)
+    #print("L'utente {} ha cambiato lo stato dello slot {}".format(user_id, parking_id))
+    Slot = slot.get_slot(parking_id)
     if Slot is None:
         return Response("not found", 404)
     if Slot.state is False: #significa che l'utente si è parcheggiato quindi bisogna anche far partire il timer per il pagamento
-        #print("L'utente {} si è parcheggiato nello slot {}".format(user_id, slot_id))
+        #print("L'utente {} si è parcheggiato nello slot {}".format(user_id, parking_id))
         Slot.state = not Slot.state
         models.db.session.commit()
-        return "OK, Nello slot {} qualcuno si è parcheggiato".format(slot_id)
+        return "OK, Nello slot {} qualcuno si è parcheggiato".format(parking_id)
     elif Slot.state is True: #significa che l'utente sta lasciando lo slot quindi bisogna fermare il timer
-        #print("L'utente {} sta lasciando lo slot {}".format(user_id, slot_id))
-        ParkingSession = slot.get_last_parking_session_not_finished(slot_id)
+        #print("L'utente {} sta lasciando lo slot {}".format(user_id, parking_id))
+        ParkingSession = slot.get_last_parking_session_not_finished(parking_id)
         if ParkingSession is None:
             Slot.state = not Slot.state
             models.db.session.commit()
-            return "OK, Nello slot {} qualcuno sta lasciando lo slot ma non c'è nessuna sessione di parcheggio".format(slot_id)
+            return "OK, Nello slot {} qualcuno sta lasciando lo slot ma non c'è nessuna sessione di parcheggio".format(parking_id)
         else:
             Slot.state = not Slot.state
             end_time = int(datetime.now().timestamp())
@@ -126,7 +126,7 @@ def update_slot(slot_id):
             else:
                 ParkingSession.amount = (end_time - ParkingSession.start_time) // 60 * 0.5
             models.db.session.commit()
-            return "OK, Nello slot {} l'utente con id {} ha lasciato il parcheggio ed ha finito la sessione di parcheggio con {} secondi".format(slot_id, ParkingSession.user_id, end_time - ParkingSession.start_time)
+            return "OK, Nello slot {} l'utente con id {} ha lasciato il parcheggio ed ha finito la sessione di parcheggio con {} secondi".format(parking_id, ParkingSession.user_id, end_time - ParkingSession.start_time)
 
 
 
@@ -142,12 +142,12 @@ def get_all_slot_states():
 
 
 
-@slots.route("/get_slot_state/<slot_id>", methods=["GET"])
-def get_slot_state(slot_id):
+@slots.route("/get_slot_state/<parking_id>", methods=["GET"])
+def get_slot_state(parking_id):
     """
     Route per ottenere lo stato di uno slot.
     """
-    Slot = slot.get_slot(slot_id)
+    Slot = slot.get_slot(parking_id)
     return jsonify(Slot.state) if Slot is not None else Response("not found", 404)
 
 
@@ -213,7 +213,6 @@ def update_parking_history():
     SlotsState = slot.get_slots_state()
     print("DEBUG: lunghezza SlotsState")
     print(len(SlotsState))
-    print(len(SlotsState.items()))
     size = slot.get_history_size(1)
     if size < 3600:
         timestamp = int(datetime.now().timestamp())
