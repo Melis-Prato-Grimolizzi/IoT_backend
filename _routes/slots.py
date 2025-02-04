@@ -195,9 +195,9 @@ def update_only_state():
     if Slot is None:
         return Response("not found", 404)
     State = request.form['state']
-    if State == 1:
+    if State == "1":
         Slot.state = True
-    elif State == 0:
+    elif State == "0":
         Slot.state = False
     models.db.session.commit()
     return "OK, Lo stato dello slot {} è stato aggiornato".format(parking_id)
