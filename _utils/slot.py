@@ -39,29 +39,29 @@ def add_slot(zone, parking_id, latitude, longitude):
     db.session.commit()
     return slot
 
-def delete_slot(slot_id):
-    slot = models.Slot.query.get(slot_id)
+def delete_slot(parking_id):
+    slot = models.Slot.query.get(parking_id)
     if slot is None:
         raise NotFoundError
     db.session.delete(slot)
     db.session.commit()
     return slot
 
-def start_parking_session(user_id, slot_id, start_time):
-    session = models.ParkingSession(user_id, slot_id, start_time, 0)
+def start_parking_session(user_id, parking_id, start_time):
+    session = models.ParkingSession(user_id, parking_id, start_time, 0)
     db.session.add(session)
     db.session.commit()
 
-#def end_parking_session(slot_id, end_time):
-#    session = models.ParkingSession.query.filter_by(slot_id=slot_id, end_time=0).first()
+#def end_parking_session(parking_id, end_time):
+#    session = models.ParkingSession.query.filter_by(parking_id=parking_id, end_time=0).first()
 #    if session is None:
 #        raise NotFoundError
 #    session.end_time = end_time
 #    db.session.commit()
 #    return session
 
-def get_last_parking_session_not_finished(slot_id):
-    return models.ParkingSession.query.filter_by(slot_id=slot_id, finished=False).order_by(models.ParkingSession.start_time.desc()).first()
+def get_last_parking_session_not_finished(parking_id):
+    return models.ParkingSession.query.filter_by(parking_id=parking_id, finished=False).order_by(models.ParkingSession.start_time.desc()).first()
 
 def get_parking_sessions():
     return models.ParkingSession.query.all()
