@@ -244,4 +244,40 @@ def update_parking_history_slot(parking_id):
 
     return "OK, Cronologia del parcheggio aggiornata per lo slot {}".format(parking_id)
     
-    
+
+
+@slots.route("/get_parking_history/<periods>/", methods=["GET"])
+@decorators.admin_decorator
+def get_parking_history(periods):
+    """
+    Route per ottenere gli ultimi n(periods) stati di tutti i parcheggi.
+    """
+    ParkingHistory = slot.get_n_parking_history(periods)
+    return jsonify([p.my_serialize() for p in ParkingHistory]) if ParkingHistory is not None else Response("not found", 404)
+
+
+
+@slots.route("/get_forecasts/", methods=["GET"])
+@decorators.user_decorator
+def get_forecasts():
+    """
+    Route per ottenere le previsioni di parcheggio.
+    """
+    Forecasts = slot.get_forecasts()
+    return jsonify([f.serialize() for f in Forecasts]) if Forecasts is not None else Response("not found", 404)
+
+
+
+@slots.route("/update_forecasts_table/", methods=["POST"])
+@decorators.admin_decorator
+def update_forecasts_table():
+    """
+    Route per aggiornare la tabella delle previsioni.
+    """
+    slot.delete_forecasts_table()
+    data = request.get_json()
+    if data is None:
+        return Response("bad request", 400)
+    for parking_id, state, timestamp in data.items():
+        slot.update_forecasts_table(parking_id, state, timestamp)
+    return "OK, Tabella delle previsioni aggiornata"

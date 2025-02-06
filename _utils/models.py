@@ -164,7 +164,6 @@ class ParkingSession(db.Model):
     end_time = Column(Integer, nullable=True)
     amount = Column(DECIMAL(10,2), nullable=True)
     finished = Column(Boolean, default=False, nullable=True)
-    #per completezza forse è meglio aggiungere anche un campo finished (booleano) per sapere se la sessione è finita
     #probabilmente bisognerà aggiungere un campo per la targa dell'auto
     
     def __init__(self, user_id, parking_id, start_time, end_time):
@@ -208,6 +207,13 @@ class ParkingStatusHistory(db.Model):
             'timestamp': self.timestamp
         }
     
+    def my_serialize(self):
+        return {
+            'parking_id': self.parking_id,
+            'state': self.state,
+            'timestamp': self.timestamp
+        }
+    
     @staticmethod
     def validate_state(state: bool):
         if state is None:
@@ -227,3 +233,35 @@ class ParkingStatusHistory(db.Model):
             return False
         
         return True
+    
+
+class Forecasts(db.Model):
+    """
+    Modello di Forecast della nostra app.
+    """
+    __tablename__ = 'Forecasts'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    parking_id = Column(Integer, ForeignKey('Slot.parking_id'), nullable=False)
+    state = Column(Boolean, default=False, nullable=False)
+    timestamp = Column(Integer, nullable=False)
+
+    def __init__(self, parking_id, state, timestamp):
+        self.parking_id = parking_id
+        self.state = state
+        self.timestamp = timestamp
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'parking_id': self.parking_id,
+            'state': self.state,
+            'timestamp': self.timestamp
+        }
+    
+    def my_serialize(self):
+        return {
+            'parking_id': self.parking_id,
+            'state': self.state,
+            'timestamp': self.timestamp
+        }
+    

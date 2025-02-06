@@ -84,3 +84,22 @@ def remove_oldest_parking_history():
     history = models.ParkingStatusHistory.query.order_by(models.ParkingStatusHistory.timestamp.asc()).first()
     models.ParkingStatusHistory.query.filter_by(timestamp=history.timestamp).delete()
     db.session.commit()
+
+def get_n_parking_history(n):
+    n = int(n)
+    slots_count = models.Slot.query.count()
+    return models.ParkingStatusHistory.query.order_by(
+        models.ParkingStatusHistory.timestamp.desc(), 
+        models.ParkingStatusHistory.parking_id.asc()).limit(n*slots_count).all()
+    
+def get_forecasts():
+    return models.Forecasts.query.all()
+
+def delete_forecasts_table():
+    models.Forecasts.query.delete()
+    db.session.commit()
+
+def update_forecasts_table(parking_id, state, timestamp):
+    forecast = models.Forecasts(parking_id, state, timestamp)
+    db.session.add(forecast)
+    db.session.commit()
