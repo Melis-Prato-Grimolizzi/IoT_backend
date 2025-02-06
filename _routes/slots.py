@@ -258,7 +258,7 @@ def get_parking_history(periods):
 
 
 @slots.route("/get_forecasts/", methods=["GET"])
-@decorators.user_decorator
+@decorators.auth_decorator
 def get_forecasts():
     """
     Route per ottenere le previsioni di parcheggio.
@@ -278,6 +278,6 @@ def update_forecasts_table():
     data = request.get_json()
     if data is None:
         return Response("bad request", 400)
-    for parking_id, state, timestamp in data.items():
-        slot.update_forecasts_table(parking_id, state, timestamp)
+    for ds, parking_id, y in data:
+        slot.update_forecasts_table(parking_id, int(y), ds)
     return "OK, Tabella delle previsioni aggiornata"
