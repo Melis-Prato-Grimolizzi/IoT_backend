@@ -103,3 +103,6 @@ def update_forecasts_table(parking_id, state, timestamp):
     forecast = models.Forecasts(parking_id, state, timestamp)
     db.session.add(forecast)
     db.session.commit()
+
+def check_if_user_is_parking(user_id):
+    return models.ParkingSession.query.filter_by(user_id=user_id, finished=False).all()

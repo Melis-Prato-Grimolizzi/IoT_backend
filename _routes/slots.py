@@ -81,6 +81,9 @@ def start_parking_session(user_id, parking_id):
     """
     Route per iniziare una sessione di parcheggio.
     """
+    check = slot.check_if_user_is_parking(user_id)
+    if check is not None:
+        return Response("Non puoi iniziare una sessione di parcheggio se ne hai già iniziata un'altra", 401)
     Slot = slot.get_slot(parking_id)
     if Slot is None:
         return Response("not found", 404)
