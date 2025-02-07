@@ -93,7 +93,12 @@ def get_n_parking_history(n):
         models.ParkingStatusHistory.parking_id.asc()).limit(n*slots_count).all()
     
 def get_forecasts():
-    return models.Forecasts.query.all()
+    parkings = models.Slot.query.all()
+    results = {}
+    for parking in parkings:
+        forecast = models.Forecasts.query.filter_by(parking_id=parking.parking_id, state=False).first()
+        results[parking.parking_id] = forecast is None
+    return results
 
 def delete_forecasts_table():
     models.Forecasts.query.delete()
@@ -105,4 +110,9 @@ def update_forecasts_table(parking_id, state, timestamp):
     db.session.commit()
 
 def check_if_user_is_parking(user_id):
-    return models.ParkingSession.query.filter_by(user_id=user_id, finished=False).all()
+    check = models.ParkingSession.query.filter_by(user_id=user_id, finished=False).count()
+    return check > 0
+
+def check_if_parking_is_taken(parking_id):
+    check = models.ParkingSession.query.filter_by(parking_id=parking_id, finished=False).count()
+    return check > 0

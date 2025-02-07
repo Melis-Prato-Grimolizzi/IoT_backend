@@ -81,14 +81,17 @@ def start_parking_session(user_id, parking_id):
     """
     Route per iniziare una sessione di parcheggio.
     """
-    check = slot.check_if_user_is_parking(user_id)
-    if check is not None:
-        return Response("Non puoi iniziare una sessione di parcheggio se ne hai già iniziata un'altra", 401)
+    check_user = slot.check_if_user_is_parking(user_id)
+    if check_user is True:
+        return Response("Non puoi iniziare una sessione di parcheggio se ne hai già iniziata un'altra", 409)
+    check_parking = slot.check_if_parking_is_taken(parking_id)
+    if check_parking is True:
+        return Response("Non puoi iniziare una sessione di parcheggio se lo slot è già occupato", 409)
     Slot = slot.get_slot(parking_id)
     if Slot is None:
         return Response("not found", 404)
     if Slot.state is False:
-        return Response("Non puoi iniziare una sessione di parcheggio prima di esserti parcheggiato", 401)
+        return Response("Non puoi iniziare una sessione di parcheggio prima di esserti parcheggiato", 403)
     start_time = int(datetime.now().timestamp())
     slot.start_parking_session(user_id, parking_id, start_time)
     models.db.session.commit()
@@ -262,12 +265,12 @@ def get_parking_history(periods):
 
 @slots.route("/get_forecasts/", methods=["GET"])
 @decorators.auth_decorator
-def get_forecasts():
+def get_forecasts(user_id):
     """
     Route per ottenere le previsioni di parcheggio.
     """
     Forecasts = slot.get_forecasts()
-    return jsonify([f.serialize() for f in Forecasts]) if Forecasts is not None else Response("not found", 404)
+    return jsonify(Forecasts) if Forecasts is not None else Response("not found", 404)
 
 
 
@@ -277,10 +280,10 @@ def update_forecasts_table():
     """
     Route per aggiornare la tabella delle previsioni.
     """
-    slot.delete_forecasts_table()
     data = request.get_json()
     if data is None:
         return Response("bad request", 400)
-    for ds, parking_id, y in data:
-        slot.update_forecasts_table(parking_id, int(y), ds)
+    slot.delete_forecasts_table()
+    for timestamp, parking_id, state in data:
+        slot.update_forecasts_table(parking_id, int(state), timestamp)
     return "OK, Tabella delle previsioni aggiornata"
