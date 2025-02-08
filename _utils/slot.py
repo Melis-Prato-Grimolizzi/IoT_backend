@@ -1,3 +1,4 @@
+from flask import jsonify
 from _utils import models, db
 
 """
@@ -14,8 +15,15 @@ class NotFoundError(Exception):
 def get_slots():
     return models.Slot.query.all()
 
-def get_slot(slot_id):
-    return models.Slot.query.get(slot_id)
+def get_slots_state():
+    Slots = models.Slot.query.all()
+    return {s.parking_id: s.state for s in Slots}
+
+def get_slot(parking_id):
+    return models.Slot.query.filter_by(parking_id=parking_id).first()
+
+def get_history_size(parking_id):
+    return models.ParkingStatusHistory.query.filter_by(parking_id=parking_id).count()
 
 def get_slots_by_zone(zone):
     Slots = models.Slot.query.filter_by(zone=zone).all()
@@ -31,29 +39,29 @@ def add_slot(zone, parking_id, latitude, longitude):
     db.session.commit()
     return slot
 
-def delete_slot(slot_id):
-    slot = models.Slot.query.get(slot_id)
+def delete_slot(parking_id):
+    slot = models.Slot.query.get(parking_id)
     if slot is None:
         raise NotFoundError
     db.session.delete(slot)
     db.session.commit()
     return slot
 
-def start_parking_session(user_id, slot_id, start_time):
-    session = models.ParkingSession(user_id, slot_id, start_time, 0)
+def start_parking_session(user_id, parking_id, start_time):
+    session = models.ParkingSession(user_id, parking_id, start_time, 0)
     db.session.add(session)
     db.session.commit()
 
-#def end_parking_session(slot_id, end_time):
-#    session = models.ParkingSession.query.filter_by(slot_id=slot_id, end_time=0).first()
+#def end_parking_session(parking_id, end_time):
+#    session = models.ParkingSession.query.filter_by(parking_id=parking_id, end_time=0).first()
 #    if session is None:
 #        raise NotFoundError
 #    session.end_time = end_time
 #    db.session.commit()
 #    return session
 
-def get_last_parking_session_not_finished(slot_id):
-    return models.ParkingSession.query.filter_by(slot_id=slot_id, finished=False).order_by(models.ParkingSession.start_time.desc()).first()
+def get_last_parking_session_not_finished(parking_id):
+    return models.ParkingSession.query.filter_by(parking_id=parking_id, finished=False).order_by(models.ParkingSession.start_time.desc()).first()
 
 def get_parking_sessions():
     return models.ParkingSession.query.all()
@@ -77,10 +85,34 @@ def remove_oldest_parking_history():
     models.ParkingStatusHistory.query.filter_by(timestamp=history.timestamp).delete()
     db.session.commit()
 
-def get_history_size(slot_id):
-    return models.ParkingStatusHistory.query.filter_by(slot_id=slot_id).all().count()
+def get_n_parking_history(n):
+    n = int(n)
+    slots_count = models.Slot.query.count()
+    return models.ParkingStatusHistory.query.order_by(
+        models.ParkingStatusHistory.timestamp.desc(), 
+        models.ParkingStatusHistory.parking_id.asc()).limit(n*slots_count).all()
+    
+def get_forecasts():
+    parkings = models.Slot.query.all()
+    results = {}
+    for parking in parkings:
+        forecast = models.Forecasts.query.filter_by(parking_id=parking.parking_id, state=False).first()
+        results[parking.parking_id] = forecast is None
+    return results
 
+def delete_forecasts_table():
+    models.Forecasts.query.delete()
+    db.session.commit()
 
-def get_slots_state():
-    Slots = models.Slot.query.all()
-    return {s.id: s.state for s in Slots}
+def update_forecasts_table(parking_id, state, timestamp):
+    forecast = models.Forecasts(parking_id, state, timestamp)
+    db.session.add(forecast)
+    db.session.commit()
+
+def check_if_user_is_parking(user_id):
+    check = models.ParkingSession.query.filter_by(user_id=user_id, finished=False).count()
+    return check > 0
+
+def check_if_parking_is_taken(parking_id):
+    check = models.ParkingSession.query.filter_by(parking_id=parking_id, finished=False).count()
+    return check > 0

@@ -96,7 +96,7 @@ def admin_decorator(f):
     @functools.wraps(f)
     def decorated(*args, **kwargs):
         """
-        Decorator che verifica se il jwt è presente ed è valido.
+        Decorator che verifica se l'utente è admin e se il jwt è presente ed è valido.
         """
         user_id = get_user_id()
         user = get(user_id)
