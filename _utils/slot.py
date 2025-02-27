@@ -95,9 +95,16 @@ def get_n_parking_history(n):
 def get_forecasts():
     parkings = models.Slot.query.all()
     results = {}
+    limit = 1
     for parking in parkings:
-        forecast = models.Forecasts.query.filter_by(parking_id=parking.parking_id, state=False).first()
-        results[parking.parking_id] = forecast is None
+        forecasts = models.Forecasts.query.filter_by(parking_id=parking.parking_id).order_by(models.Forecasts.timestamp.asc())
+        for i, forecast in enumerate(forecasts):
+            if not forecast.state:
+                results[parking.parking_id] = False
+                break
+            if i == limit:
+                results[parking.parking_id] = True
+                break
     return results
 
 def delete_forecasts_table():
