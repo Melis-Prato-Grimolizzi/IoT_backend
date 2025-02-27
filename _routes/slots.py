@@ -190,6 +190,7 @@ def get_user_parking_sessions(user_id):
     return jsonify([p.serialize() for p in ParkingSession]) if ParkingSession is not None else Response("not found", 404)
 
 
+
 @slots.route("/update_only_state/", methods=["POST"])
 @decorators.admin_decorator
 def update_only_state():
