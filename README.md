@@ -1,6 +1,6 @@
 # Backend IoT
 
-# API Documentation
+# API Documentation not yet finished and I don't know when it will be. (Probably never)
 
 The API exposes multiple HTTP routes.
 
